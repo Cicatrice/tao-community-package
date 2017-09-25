@@ -21,7 +21,7 @@
               error="${log.path}"
               passthru="true"
               checkreturn="true"/>
-        <echo msg="Creating the package..."/>
+        <echo msg="Creating the package ${package.output.tar}"/>
 	<exec command="tar -c --exclude=./package.tar.gz -z -f ${package.output.tar} ${package.source}"
               error="${log.path}"
               passthru="true"
@@ -34,8 +34,14 @@
     </target>
 
 		<target name="push-tar">
-			<echo msg="Pushing tar to ${github.tag}" />
-			<exec command="curl -s -H 'Authorization: token ${env.GITHUB_TOKEN}' https://api.github.com/repos/Cicatrice/tao-community-package/releases/tags/${github.tag}  | xargs -0 node -e 'console.log(JSON.parse(process.argv[1]).id)'" outputProperty="github.release.id" />
-			<exec command="curl -v -H 'Authorization: token ${env.GITHUB_TOKEN}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.tar}' 'https://uploads.github.com/repos/Cicatrice/tao-community-package/releases/${github.release.id}/assets?name=$(basename ${package.output.tar})'" />
+			<echo msg="Pushing ${package.output.tar} to ${github.tag}" />
+			<exec command="curl -s -H 'Authorization: token ${env.GITHUB_TOKEN}' https://api.github.com/repos/Cicatrice/tao-community-package/releases/tags/${github.tag}  | xargs -0 node -e 'console.log(JSON.parse(process.argv[1]).id)'" outputProperty="github.release.id"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+			<exec command="curl -v -H 'Authorization: token ${env.GITHUB_TOKEN}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.tar}' 'https://uploads.github.com/repos/Cicatrice/tao-community-package/releases/${github.release.id}/assets?name=$(basename ${package.output.tar})'"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
 		</target>
 </project>
