@@ -13,18 +13,8 @@
     </target>
 
     <target name="pack-tar" description="Create a tar from the application source">
-        <echo msg="Cleanup .git files" />
-        <exec command="rm -Rf .git */.git"
-              error="${log.path}"
-              passthru="true"
-              checkreturn="true"/>
         <echo msg="Creating the package ${package.output.tar}"/>
-	<exec command="tar -c --exclude=./package.tar.gz -z -f ${package.output.tar} ${package.source}"
-              error="${log.path}"
-              passthru="true"
-              checkreturn="true"/>
-        <echo msg="Cleaning up workspace..." />
-        <exec command="rm -Rf data funcAcl generis ltiDeliveryProvider qti* tao* vendor .gitignore composer.* key.bin"
+	      <exec command="tar -c --exclude=${package.output.tar} --exclude=.git --exclude=*/.git  --exclude=. --exclude=.. -f ${package.output.tar} * .*"
               error="${log.path}"
               passthru="true"
               checkreturn="true"/>
