@@ -1,0 +1,41 @@
+<project name="tao-community-package" default="help" basedir=".">
+	<property name="log.path" value="/dev/stderr" />
+	<property name="package.source" value="*" />
+	<property environment="env" />
+  <php expression="preg_replace('/^refs\/tags\//','',${env.CPHP_GIT_REF})" returnProperty="github.tag"/>
+  <php expression="preg_replace('/^refs\/tags\//','',${env.CPHP_GIT_REF})+'.tar.gz'" returnProperty="package.output.tar"/>
+
+    <target name="help" description="List available targets">
+        <exec executable="phing"
+              passthru="true">
+            <arg value="-l"/>
+        </exec>
+    </target>
+
+    <target name="loadproperties">
+    </target>
+
+    <target name="pack-tar" description="Create a tar from the application source">
+        <echo msg="Cleanup .git files" />
+        <exec command="rm -Rf .git */.git"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+        <echo msg="Creating the package..."/>
+	<exec command="tar -c --exclude=./package.tar.gz -z -f ${package.output.tar} ${package.source}"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+        <echo msg="Cleaning up workspace..." />
+        <exec command="rm -Rf data funcAcl generis ltiDeliveryProvider qti* tao* vendor .gitignore composer.* key.bin"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+    </target>
+
+		<target name="push-tar">
+			<echo msg="Pushing tar to ${github.tag}" />
+			<exec command="curl -s -H 'Authorization: token ${env.GITHUB_TOKEN}' https://api.github.com/repos/Cicatrice/tao-community-package/releases/tags/${github.tag}  | xargs -0 node -e 'console.log(JSON.parse(process.argv[1]).id)'" outputProperty="github.release.id" />
+			<exec command="curl -v -H 'Authorization: token ${env.GITHUB_TOKEN}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.tar}' 'https://uploads.github.com/repos/Cicatrice/tao-community-package/releases/${github.release.id}/assets?name=$(basename ${package.output.tar})'" />
+		</target>
+</project>
