@@ -2,17 +2,14 @@
 	<property name="log.path" value="/dev/stderr" />
 	<property name="package.source" value="*" />
 	<property environment="env" />
-  <php expression="echo preg_replace('/^refs\/tags\//','','${env.CPHP_GIT_REF}');" returnProperty="github.tag"/>
-  <php expression="echo preg_replace('/^refs\/tags\//','','${env.CPHP_GIT_REF}')+'.tar.gz';" returnProperty="package.output.tar"/>
+  <php expression="preg_replace('/^refs\/tags\/(.*)/','$1','${env.CPHP_GIT_REF}')" returnProperty="github.tag"/>
+  <php expression="preg_replace('/^refs\/tags\/(.*)/','$1','${env.CPHP_GIT_REF}').'.tar.gz'" returnProperty="package.output.tar"/>
 
     <target name="help" description="List available targets">
         <exec executable="phing"
               passthru="true">
             <arg value="-l"/>
         </exec>
-    </target>
-
-    <target name="loadproperties">
     </target>
 
     <target name="pack-tar" description="Create a tar from the application source">
