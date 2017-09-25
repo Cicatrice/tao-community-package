@@ -2,8 +2,8 @@
 	<property name="log.path" value="/dev/stderr" />
 	<property name="package.source" value="*" />
 	<property environment="env" />
-  <php expression="preg_replace('/^refs\/tags\//','',${env.CPHP_GIT_REF})" returnProperty="github.tag"/>
-  <php expression="preg_replace('/^refs\/tags\//','',${env.CPHP_GIT_REF})+'.tar.gz'" returnProperty="package.output.tar"/>
+  <php expression="preg_replace('/^refs\/tags\//','','${env.CPHP_GIT_REF}')" returnProperty="github.tag"/>
+  <php expression="preg_replace('/^refs\/tags\//','','${env.CPHP_GIT_REF}')+'.tar.gz'" returnProperty="package.output.tar"/>
 
     <target name="help" description="List available targets">
         <exec executable="phing"
