@@ -1,12 +1,14 @@
+%define tao_version %(echo $TAO_VERSION)
+
 Name:           tao-community
-Version:        0.0.2
-Release:        1%{?dist}
+Version:        %{tao_version}
+Release:        0
 Summary:        Open Source assessment development software
 License:        GNU GPL v2
 URL:            https://hub.taocloud.org/
-#Source0:        tao-community-source.tar.gz
+Source0:        %{name}-%{version}.tar.gz
 #Source0:        source
-Source0:	http://gogs.cicatrice.eu/cicatrice/tao-community-package/archive/v%{version}.tar.gz
+#Source0:	http://gogs.cicatrice.eu/cicatrice/tao-community-package/archive/v%{version}.tar.gz
 
 BuildArch:      noarch
 #BuildRequires:
@@ -20,22 +22,22 @@ TAO is the first commercial-grade Open Source assessment development software on
 %global debug_package %{nil}
 
 %prep
-%setup -q -n tao-community-package
+#%setup -q -n tao-community-package
 
 %build
-echo Start build
+#echo Start build
 ##mkdir -p %{buildroot}
 ##cp -a source/app %{buildroot}/
 #cp -R ../LICENSE  %{buildroot}/
-pushd source/app
+#pushd source/app
 ##pushd %{buildroot}/app
-composer install
-rm composer.json composer.lock
-popd
+#composer install
+#rm composer.json composer.lock
+#popd
 
 %install
-mkdir -p %{buildroot}%{_datadir}
-mv source/app %{buildroot}/%{_datadir}/tao
+mkdir -p %{buildroot}%{_datadir}/tao
+install -d . %{buildroot}/%{_datadir}/tao
 rm -rf %{buildroot}/%{_datadir}/tao/taoqtiitem/views/js/portablesharedlibraries %{buildroot}/%{_datadir}/tao/tao/views/locales
 mkdir -p                                                     \
  %{buildroot}/%{_sysconfdir}/tao                             \
@@ -59,9 +61,11 @@ mkdir -p                                                     \
 
 %clean
 rm -rf %{buildroot}
+echo welcome package %{_rpmfilename}
+env | grep rpm
 
 %files
-%license LICENSE
+#%license LICENSE
 %{_datadir}/tao/
 %{_sharedstatedir}/tao/db/
 %{_sharedstatedir}/tao/files/

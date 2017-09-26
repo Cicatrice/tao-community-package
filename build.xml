@@ -4,7 +4,9 @@
 	<property environment="env" />
 	<property name="github.token" value="${env.GITHUB_TOKEN}" />
   <php expression="preg_replace('/^refs\/tags\/(.*)/','$1','${env.CPHP_GIT_REF}')" returnProperty="github.tag"/>
+  <php expression="preg_replace('/^refs\/tags\/.*-([0-9.]*)/','$1','${env.CPHP_GIT_REF}')" returnProperty="release.version"/>
   <php expression="preg_replace('/^refs\/tags\/(.*)/','$1','${env.CPHP_GIT_REF}').'.tar.gz'" returnProperty="package.output.tar"/>
+  <php expression="preg_replace('/^refs\/tags\/(.*)/','$1','${env.CPHP_GIT_REF}').'.noarch.rpm'" returnProperty="package.output.rpm"/>
   <exec command="git ls-remote --get-url |  sed -E -e 's@^(.*)[:](.*)/(.*)$@\2@' -e's/\.git//'" outputProperty="github.owner"/>
   <exec command="git ls-remote --get-url |  sed -E -e 's@^(.*)[:](.*)/(.*)$@\3@' -e's/\.git//'" outputProperty="github.repo"/>
 
@@ -15,7 +17,7 @@
         </exec>
     </target>
 
-    <target name="pack-tar" description="Create a tar from the application source">
+		<target name="pack-tar" description="Create a tar from the application source">
         <echo msg="Creating the package ${package.output.tar}"/>
 	      <exec command="tar -c --exclude=.git --exclude=*/.git --exclude=. --exclude=.. -f ../../${package.output.tar} * .*"
 					    dir="source/app"
@@ -24,14 +26,39 @@
               checkreturn="true"/>
     </target>
 
-		<target name="push-tar">
+
+    <target name="pack-rpm" description="Create a rpm from the application source">
+        <echo msg="Copy source package ${package.output.tar} to RPM build environement"/>
+	      <exec command="mkdir -p ~/rpmbuild/SOURCES/ ; cp ${package.output.tar} ~/rpmbuild/SOURCES/"
+              error="${log.path}"
+              checkreturn="true"/>
+        <echo msg="Creating the package ${package.output.rpm}"/>
+	      <exec command="TAO_VERSION='${release.version}' rpmbuild -ba tao-community.spec --define '_rpmfilename ${package.output.rpm}'"
+              error="${log.path}"
+              checkreturn="true"/>
+	      <exec command="mv ~/rpmbuild/RPMS/${package.output.rpm} ./"
+              error="${log.path}"
+              checkreturn="true"/>
+    </target>
+
+		<target name="identify-release">
 			<echo msg="Identifying release ID for ${github.tag}" />
 			<exec command="curl -s -H 'Authorization: token ${github.token}' https://api.github.com/repos/${github.owner}/${github.repo}/releases/tags/${github.tag}  | xargs -0 node -e 'console.log(JSON.parse(process.argv[1]).id)'"
 				      outputProperty="github.release.id"
               error="${log.path}"
               checkreturn="true"/>
+		</target>
+
+		<target name="push-tar" depends="identify-release">
 			<echo msg="Pushing ${package.output.tar} to ${github.tag} (${github.release.id})" />
 			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.tar}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.tar}'"
+              error="${log.path}"
+              checkreturn="true"/>
+		</target>
+
+		<target name="push-rpm" depends="identify-release">
+			<echo msg="Pushing ${package.output.rpm} to ${github.tag} (${github.release.id})" />
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.rpm}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.rpm}'"
               error="${log.path}"
               checkreturn="true"/>
 		</target>
