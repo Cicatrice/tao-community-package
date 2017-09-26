@@ -28,7 +28,7 @@ TAO is the first commercial-grade Open Source assessment development software on
 
 %install
 mkdir -p %{buildroot}%{_datadir}/%{name}
-install .htaccess * %{buildroot}%{_datadir}/%{name}
+mv .htaccess * %{buildroot}%{_datadir}/%{name}/
 #rm -rf %{buildroot}/%{_datadir}/%{name}/taoqtiitem/views/js/portablesharedlibraries %{buildroot}/%{_datadir}/%{name}/tao/views/locales
 mkdir -p                                                     \
  %{buildroot}/%{_sysconfdir}/%{name}                             \
@@ -40,7 +40,7 @@ mkdir -p                                                     \
 rm -rf %{buildroot}
 
 %files
-%license LICENSE
+%license %{_datadir}/%{name}/LICENSE
 %{_datadir}/%{name}/
 %{_sharedstatedir}/%{name}/files/
 %config(noreplace) %{_sysconfdir}/%{name}/
