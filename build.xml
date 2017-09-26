@@ -2,8 +2,11 @@
 	<property name="log.path" value="/dev/stderr" />
 	<property name="package.source" value="*" />
 	<property environment="env" />
+	<property name="github.token" value="${env.GITHUB_TOKEN}" />
   <php expression="preg_replace('/^refs\/tags\/(.*)/','$1','${env.CPHP_GIT_REF}')" returnProperty="github.tag"/>
   <php expression="preg_replace('/^refs\/tags\/(.*)/','$1','${env.CPHP_GIT_REF}').'.tar.gz'" returnProperty="package.output.tar"/>
+  <exec command="git ls-remote --get-url |  sed -E -e 's@^(.*)[:](.*)/(.*)$@\2@' -e's/\.git//'" outputProperty="github.owner"/>
+  <exec command="git ls-remote --get-url |  sed -E -e 's@^(.*)[:](.*)/(.*)$@\3@' -e's/\.git//'" outputProperty="github.repo"/>
 
     <target name="help" description="List available targets">
         <exec executable="phing"
@@ -14,21 +17,22 @@
 
     <target name="pack-tar" description="Create a tar from the application source">
         <echo msg="Creating the package ${package.output.tar}"/>
-	      <exec command="tar -c --exclude=${package.output.tar} --exclude=.git --exclude=*/.git  --exclude=. --exclude=.. -f ${package.output.tar} * .*"
+	      <exec command="tar -c --exclude=.git --exclude=*/.git --exclude=. --exclude=.. -f ../../${package.output.tar} * .*"
+					    dir="source/app"
               error="${log.path}"
               passthru="true"
               checkreturn="true"/>
     </target>
 
 		<target name="push-tar">
-			<echo msg="Pushing ${package.output.tar} to ${github.tag}" />
-			<exec command="curl -s -H 'Authorization: token ${env.GITHUB_TOKEN}' https://api.github.com/repos/Cicatrice/tao-community-package/releases/tags/${github.tag}  | xargs -0 node -e 'console.log(JSON.parse(process.argv[1]).id)'" outputProperty="github.release.id"
+			<echo msg="Identifying release ID for ${github.tag}" />
+			<exec command="curl -s -H 'Authorization: token ${github.token}' https://api.github.com/repos/${github.owner}/${github.repo}/releases/tags/${github.tag}  | xargs -0 node -e 'console.log(JSON.parse(process.argv[1]).id)'"
+				      outputProperty="github.release.id"
               error="${log.path}"
-              passthru="true"
               checkreturn="true"/>
-			<exec command="curl -v -H 'Authorization: token ${env.GITHUB_TOKEN}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.tar}' 'https://uploads.github.com/repos/Cicatrice/tao-community-package/releases/${github.release.id}/assets?name=$(basename ${package.output.tar})'"
+			<echo msg="Pushing ${package.output.tar} to ${github.tag} (${github.release.id})" />
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.tar}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.tar}'"
               error="${log.path}"
-              passthru="true"
               checkreturn="true"/>
 		</target>
 </project>
