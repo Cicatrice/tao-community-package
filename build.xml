@@ -117,7 +117,7 @@
               error="${log.path}"
               checkreturn="true"/>
         <echo msg="Creating the package ${package.output.rpm}"/>
-	      <exec command="TAO_VERSION='${release.version}' rpmbuild -ba ./source/rpm/tao-community.spec --define '_topdir ${phing.dir}/${build.rpm.path}' --define '_rpmfilename ${package.output.rpm}'"
+	      <exec command="TAO_VERSION='${release.version}' rpmbuild -ba ./source/rpm/tao-community.spec --target noarch --define '_topdir ${phing.dir}/${build.rpm.path}' --define '_rpmfilename ${package.output.rpm}'"
               error="${log.path}"
               checkreturn="true"/>
 	      <exec command="mv ${build.rpm.path}/RPMS/${package.output.rpm} ./"
