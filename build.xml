@@ -141,15 +141,15 @@
 		</target>
 
 		<target name="push-rpm" depends="identify-release">
-			<echo msg="pushing ${package.output.rpm} to ${github.tag} (${github.release.id})" />
-			<exec command="curl -h 'Authorization: token ${github.token}' -h 'Content-Type: application/octet-stream' --data-binary @'${package.output.rpm}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.rpm}'"
+			<echo msg="Pushing ${package.output.rpm} to ${github.tag} (${github.release.id})" />
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.rpm}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.rpm}'"
               error="${log.path}"
               checkreturn="true"/>
 		</target>
 
 		<target name="push-deb" depends="identify-release">
-			<echo msg="pushing ${package.output.deb} to ${github.tag} (${github.release.id})" />
-			<exec command="curl -h 'Authorization: token ${github.token}' -h 'Content-Type: application/octet-stream' --data-binary @'${package.output.deb}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.deb}'"
+			<echo msg="Pushing ${package.output.deb} to ${github.tag} (${github.release.id})" />
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.deb}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.deb}'"
               error="${log.path}"
               checkreturn="true"/>
 
