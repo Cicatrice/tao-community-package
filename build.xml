@@ -306,7 +306,7 @@
               checkreturn="true"/>
 		</target>
 
-		<target name="push-vendor-deb" depends="vendor-mathjax-deb,vendor-pdfjs-rpm,identify-release">
+		<target name="push-vendor-deb" depends="vendor-mathjax-deb,vendor-pdfjs-deb,identify-release">
 			<echo msg="Pushing ${package.vendor.mathjax.deb} to ${github.tag} (${github.release.id})" />
 			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.vendor.mathjax.deb}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.vendor.mathjax.deb}'"
               error="${log.path}"
@@ -341,5 +341,5 @@
               error="${log.path}"
               checkreturn="true"/>
 		</target>
-		<target name="push-all" depends="push-tar,push-rpm,push-deb,push-vendor-rpm,push-vendor-deb" />
+		<target name="push-all" depends="pack-tar,pack-rpm,pack-deb,vendor-mathjax-rpm,vendor-mathjax-deb,vendor-pdfjs-rpm,vendor-pdfjs-deb,push-tar,push-rpm,push-deb,push-vendor-rpm,push-vendor-deb" />
 </project>
