@@ -40,6 +40,13 @@
               checkreturn="true"/>
 		</target>
 
+		<target name="build">
+			  <exec command="composer install -o --no-interaction --ansi --no-progress --no-dev"
+              error="${log.path}"
+							dir="source/app"
+              checkreturn="true"/>
+		</target>
+
 		<target name="vendor-pdfjs-tar" description="Create a tar from the application source">
 			  <property name="build.vendor.pdfjs.path" value="./build/vendor/pdfjs" />
         <echo msg="Creating the package ${package.vendor.pdfjs}"/>
@@ -120,7 +127,7 @@
               checkreturn="true"/>
     </target>
 
-    <target name="pack-deb" description="create a deb from the application source">
+    <target name="pack-deb" depends="pack-tar" description="create a deb from the application source">
 			  <property name="build.deb.path" value="./build/deb/${build.deb.name}" />
         <echo msg="copy source package ${package.output.tar} to deb build environement"/>
 	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/DEBIAN ; cp releases/${package.output.tar} ${build.deb.path}/"
@@ -156,7 +163,7 @@
     </target>
 
 
-    <target name="vendor-pdfjs-deb" description="Create a deb from the application source">
+    <target name="vendor-pdfjs-deb" depends="vendor-pdfjs-tar" description="Create a deb from the application source">
 			  <property name="build.deb.path" value="./build/deb-pdfjs/${package.vendor.pdfjs.name}" />
         <echo msg="Copy source package ${package.output.tar} to DEB build environement"/>
 	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/ ; cp releases/${package.vendor.pdfjs}  ${build.deb.path}/"
@@ -192,7 +199,7 @@
               checkreturn="true"/>
     </target>
 
-    <target name="vendor-mathjax-deb" description="Create a deb from the application source">
+    <target name="vendor-mathjax-deb" depends="vendor-mathjax-tar" description="Create a deb from the application source">
 			  <property name="build.deb.path" value="./build/deb-mathjax/${package.vendor.mathjax.name}" />
         <echo msg="Copy source package ${package.output.tar} to DEB build environement"/>
 	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/ ; cp releases/${package.vendor.mathjax}  ${build.deb.path}/"
@@ -228,7 +235,7 @@
               checkreturn="true"/>
     </target>
 
-    <target name="vendor-pdfjs-rpm" description="Create a rpm from the application source">
+    <target name="vendor-pdfjs-rpm" depends="vendor-pdfjs-tar" description="Create a rpm from the application source">
 			  <property name="build.rpm.path" value="./build/rpm-pdfjs/" />
         <echo msg="Copy source package ${package.output.tar} to RPM build environement"/>
 	      <exec command="rm -rf ${build.rpm.path} ; mkdir -p ${build.rpm.path}/SOURCES/ ; cp releases/${package.vendor.pdfjs}  ${build.rpm.path}/SOURCES/"
@@ -243,7 +250,7 @@
               checkreturn="true"/>
     </target>
 
-    <target name="vendor-mathjax-rpm" description="Create a rpm from the application source">
+    <target name="vendor-mathjax-rpm" depends="vendor-mathjax-tar" description="Create a rpm from the application source">
 			  <property name="build.rpm.path" value="./build/rpm-mathjax/" />
         <echo msg="Copy source package ${package.output.tar} to RPM build environement"/>
 	      <exec command="rm -rf ${build.rpm.path} ; mkdir -p ${build.rpm.path}/SOURCES/ ; cp releases/${package.vendor.mathjax}  ${build.rpm.path}/SOURCES/"
@@ -258,7 +265,7 @@
               checkreturn="true"/>
     </target>
 
-    <target name="pack-rpm" description="Create a rpm from the application source">
+    <target name="pack-rpm" depends="pack-tar" description="Create a rpm from the application source">
 			  <property name="build.rpm.path" value="./build/rpm/" />
         <echo msg="Copy source package ${package.output.tar} to RPM build environement"/>
 	      <exec command="rm -rf ${build.rpm.path} ; mkdir -p ${build.rpm.path}/SOURCES/ ; cp releases/${package.output.tar} ${build.rpm.path}/SOURCES/"
@@ -286,25 +293,47 @@
               checkreturn="true"/>
 		</target>
 
-		<target name="push-tar" depends="identify-release">
+		<target name="push-tar" depends="pack-tar,identify-release">
 			<echo msg="Pushing ${package.output.tar} to ${github.tag} (${github.release.id})" />
 			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.output.tar}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.tar}'"
               error="${log.path}"
               checkreturn="true"/>
 		</target>
 
-		<target name="push-rpm" depends="identify-release">
+		<target name="push-vendor-deb" depends="vendor-mathjax-deb,vendor-pdfjs-rpm,identify-release">
+			<echo msg="Pushing ${package.vendor.mathjax.deb} to ${github.tag} (${github.release.id})" />
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.vendor.mathjax.deb}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.vendor.mathjax.deb}'"
+              error="${log.path}"
+              checkreturn="true"/>
+			<echo msg="Pushing ${package.vendor.pdfjs.deb} to ${github.tag} (${github.release.id})" />
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.vendor.pdfjs.deb}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.vendor.pdfjs.deb}'"
+              error="${log.path}"
+              checkreturn="true"/>
+		</target>
+
+		<target name="push-vendor-rpm" depends="vendor-mathjax-rpm,vendor-pdfjs-rpm,identify-release">
+			<echo msg="Pushing ${package.vendor.mathjax.rpm} to ${github.tag} (${github.release.id})" />
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.vendor.mathjax.rpm}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.vendor.mathjax.rpm}'"
+              error="${log.path}"
+              checkreturn="true"/>
+			<echo msg="Pushing ${package.vendor.pdfjs.rpm} to ${github.tag} (${github.release.id})" />
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.vendor.pdfjs.rpm}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.vendor.pdfjs.rpm}'"
+              error="${log.path}"
+              checkreturn="true"/>
+		</target>
+
+		<target name="push-rpm" depends="pack-rpm,identify-release">
 			<echo msg="Pushing ${package.output.rpm} to ${github.tag} (${github.release.id})" />
 			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.output.rpm}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.rpm}'"
               error="${log.path}"
               checkreturn="true"/>
 		</target>
 
-		<target name="push-deb" depends="identify-release">
+		<target name="push-deb" depends="pack-deb,identify-release">
 			<echo msg="Pushing ${package.output.deb} to ${github.tag} (${github.release.id})" />
 			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.output.deb}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.deb}'"
               error="${log.path}"
               checkreturn="true"/>
-
 		</target>
+		<target name="push-all" depends="push-tar,push-rpm,push-deb,push-vendor-rpm,push-vendor-deb" />
 </project>
