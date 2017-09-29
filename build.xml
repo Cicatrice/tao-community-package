@@ -40,6 +40,12 @@
               checkreturn="true"/>
 		</target>
 
+		<target name="prepare-env">
+			  <exec command="mkdir -p build releases"
+              error="${log.path}"
+              checkreturn="true"/>
+		</target>
+
 		<target name="build">
 			  <exec command="composer install -o --no-interaction --ansi --no-progress --no-dev"
               error="${log.path}"
@@ -47,10 +53,10 @@
               checkreturn="true"/>
 		</target>
 
-		<target name="vendor-pdfjs-tar" description="Create a tar from the application source">
+		<target name="vendor-pdfjs-tar" depends="prepare-env" description="Create a tar from the application source">
 			  <property name="build.vendor.pdfjs.path" value="./build/vendor/pdfjs" />
         <echo msg="Creating the package ${package.vendor.pdfjs}"/>
-	      <exec command="rm -rf ${build.vendor.pdfjs.path} ; mkdir -p ${build.vendor.pdfjs.path} ; wget -O ${build.vendor.pdfjs.path}/pdfjs.zip ${vendor.pdfjs.release}"
+	      <exec command="rm -rf ${build.vendor.pdfjs.path} ; mkdir -p ${build.vendor.pdfjs.path} ; wget --quiet -O ${build.vendor.pdfjs.path}/pdfjs.zip ${vendor.pdfjs.release}"
               error="${log.path}"
               checkreturn="true"/>
 				<exec command="unzip pdfjs.zip ; rm pdfjs.zip"
@@ -64,10 +70,10 @@
               checkreturn="true"/>
 		</target>
 
-		<target name="vendor-mathjax-tar" description="Create a tar from the application source">
+		<target name="vendor-mathjax-tar" depends="prepare-env" description="Create a tar from the application source">
 			  <property name="build.vendor.mathjax.path" value="./build/vendor/mathjax" />
         <echo msg="Creating the package ${package.vendor.mathjax}"/>
-	      <exec command="rm -rf ${build.vendor.mathjax.path} ; mkdir -p ${build.vendor.mathjax.path} ; wget -O ${build.vendor.mathjax.path}/../mathjax.tar.gz ${vendor.mathjax.release}"
+	      <exec command="rm -rf ${build.vendor.mathjax.path} ; mkdir -p ${build.vendor.mathjax.path} ; wget --quiet -O ${build.vendor.mathjax.path}/../mathjax.tar.gz ${vendor.mathjax.release}"
               error="${log.path}"
               checkreturn="true"/>
 				<exec command="tar xfz ${build.vendor.mathjax.path}/../mathjax.tar.gz --strip-components=1 -C ${build.vendor.mathjax.path} -X source/vendor/mathjax/tar-exclude.lst"
@@ -80,7 +86,7 @@
               checkreturn="true"/>
 		</target>
 
-		<target name="pack-tar" description="Create a tar from the application source">
+		<target name="pack-tar" depends="prepare-env" description="Create a tar from the application source">
         <echo msg="Creating the package ${package.output.tar}"/>
 	      <exec command="mkdir -p releases"
               error="${log.path}"
@@ -201,7 +207,7 @@
 
     <target name="vendor-mathjax-deb" depends="vendor-mathjax-tar" description="Create a deb from the application source">
 			  <property name="build.deb.path" value="./build/deb-mathjax/${package.vendor.mathjax.name}" />
-        <echo msg="Copy source package ${package.output.tar} to DEB build environement"/>
+        <echo msg="Copy source package ${package.vendor.mathjax} to DEB build environement"/>
 	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/ ; cp releases/${package.vendor.mathjax}  ${build.deb.path}/"
               error="${log.path}"
               checkreturn="true"/>
