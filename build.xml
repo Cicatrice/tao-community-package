@@ -1,4 +1,5 @@
 <project name="tao-community-package" default="help" basedir=".">
+	<property file="./build.properties" />
 	<property name="log.path" value="/dev/stderr" />
 	<property name="package.source" value="*" />
 	<property environment="env" />
@@ -14,6 +15,14 @@
 	<property name="build.ppa.name" value="tao-community-${release.version.major}.${release.version.minor}.${release.version.bugfix}" />
 	<property name="package.output.deb" value="${build.deb.name}.deb" />
 	<property name="package.output.ppa" value="${build.ppa.name}.deb" />
+	<property name="package.vendor.pdfjs" value="pdfjs-${vendor.pdfjs.version}.tar.gz" />
+	<property name="package.vendor.pdfjs.name" value="tao-community-pdfjs-${vendor.pdfjs.version}" />
+	<property name="package.vendor.pdfjs.deb" value="${package.vendor.pdfjs.name}.deb" />
+	<property name="package.vendor.pdfjs.rpm" value="${package.vendor.pdfjs.name}.rpm" />
+	<property name="package.vendor.mathjax" value="MathJax-${vendor.mathjax.version}.tar.gz" />
+	<property name="package.vendor.mathjax.name" value="tao-community-mathjax-${vendor.mathjax.version}" />
+	<property name="package.vendor.mathjax.deb" value="${package.vendor.mathjax.name}.deb" />
+	<property name="package.vendor.mathjax.rpm" value="${package.vendor.mathjax.name}.rpm" />
   <exec command="git ls-remote --get-url |  sed -E -e 's@^(.*)[:](.*)/(.*)$@\2@' -e's/\.git//'" outputProperty="github.owner"/>
   <exec command="git ls-remote --get-url |  sed -E -e 's@^(.*)[:](.*)/(.*)$@\3@' -e's/\.git//'" outputProperty="github.repo"/>
 
@@ -31,9 +40,45 @@
               checkreturn="true"/>
 		</target>
 
+		<target name="vendor-pdfjs-tar" description="Create a tar from the application source">
+			  <property name="build.vendor.pdfjs.path" value="./build/vendor/pdfjs" />
+        <echo msg="Creating the package ${package.vendor.pdfjs}"/>
+	      <exec command="rm -rf ${build.vendor.pdfjs.path} ; mkdir -p ${build.vendor.pdfjs.path} ; wget -O ${build.vendor.pdfjs.path}/pdfjs.zip ${vendor.pdfjs.release}"
+              error="${log.path}"
+              checkreturn="true"/>
+				<exec command="unzip pdfjs.zip ; rm pdfjs.zip"
+              error="${log.path}"
+							dir="${build.vendor.pdfjs.path}"
+              checkreturn="true"/>
+	      <exec command="tar -c --exclude=. --exclude=.. -z -f ../../../releases/${package.vendor.pdfjs} * .*"
+					    dir="${build.vendor.pdfjs.path}"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+		</target>
+
+		<target name="vendor-mathjax-tar" description="Create a tar from the application source">
+			  <property name="build.vendor.mathjax.path" value="./build/vendor/mathjax" />
+        <echo msg="Creating the package ${package.vendor.mathjax}"/>
+	      <exec command="rm -rf ${build.vendor.mathjax.path} ; mkdir -p ${build.vendor.mathjax.path} ; wget -O ${build.vendor.mathjax.path}/../mathjax.tar.gz ${vendor.mathjax.release}"
+              error="${log.path}"
+              checkreturn="true"/>
+				<exec command="tar xfz ${build.vendor.mathjax.path}/../mathjax.tar.gz --strip-components=1 -C ${build.vendor.mathjax.path} -X source/vendor/mathjax/tar-exclude.lst"
+              error="${log.path}"
+              checkreturn="true"/>
+	      <exec command="tar -c --exclude=. --exclude=.. -z -f ../../../releases/${package.vendor.mathjax} * .*"
+					    dir="${build.vendor.mathjax.path}"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+		</target>
+
 		<target name="pack-tar" description="Create a tar from the application source">
         <echo msg="Creating the package ${package.output.tar}"/>
-	      <exec command="tar -c -z --exclude=.git --exclude=*/.git --exclude=. --exclude=.. -f ../../${package.output.tar} * .*"
+	      <exec command="mkdir -p releases"
+              error="${log.path}"
+              checkreturn="true"/>
+	      <exec command="tar -c -z --exclude=tao/views/locales --exclude=taoQtiItem/views/js/portableSharedLibraries --exclude=.git --exclude=*/.git --exclude=. --exclude=.. -f ../../releases/${package.output.tar} * .*"
 					    dir="source/app"
               error="${log.path}"
               passthru="true"
@@ -44,7 +89,7 @@
 			  <fail msg="not yet implemented" />
 			  <property name="build.ppa.path" value="./build/ppa/${build.ppa.name}" />
         <echo msg="copy source package ${package.output.tar} to ppa build environement"/>
-	      <exec command="rm -rf ${build.ppa.path} ; mkdir -p ${build.ppa.path} ; cp ${package.output.tar} ${build.ppa.path}/"
+	      <exec command="rm -rf ${build.ppa.path} ; mkdir -p ${build.ppa.path} ; cp releases/${package.output.tar} ${build.ppa.path}/"
               error="${log.path}"
               checkreturn="true"/>
 	      <exec command="mkdir -p usr/share/tao-community ; tar xfz ${package.output.tar} -C usr/share/tao-community"
@@ -78,16 +123,8 @@
     <target name="pack-deb" description="create a deb from the application source">
 			  <property name="build.deb.path" value="./build/deb/${build.deb.name}" />
         <echo msg="copy source package ${package.output.tar} to deb build environement"/>
-	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/DEBIAN ; cp ${package.output.tar} ${build.deb.path}/"
+	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/DEBIAN ; cp releases/${package.output.tar} ${build.deb.path}/"
               error="${log.path}"
-              checkreturn="true"/>
-	      <exec command="cp ./source/deb/control ${build.deb.path}/DEBIAN/control"
-              error="${log.path}"
-              passthru="true"
-              checkreturn="true"/>
-	      <exec command="echo 'Version: ${release.version.major}.${release.version.minor}-${release.version.bugfix}' >>${build.deb.path}/DEBIAN/control"
-              error="${log.path}"
-              passthru="true"
               checkreturn="true"/>
 	      <exec command="mkdir -p usr/share/tao-community ; tar xfz ${package.output.tar} -C usr/share/tao-community"
 					    dir="${build.deb.path}"
@@ -99,13 +136,124 @@
               error="${log.path}"
               passthru="true"
               checkreturn="true"/>
+	      <exec command="cp -a ./source/deb/* ${build.deb.path}/"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="echo 'Version: ${release.version.major}.${release.version.minor}-${release.version.bugfix}' >>${build.deb.path}/DEBIAN/control"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
 	      <exec command="dpkg-deb -b ${build.deb.name}"
 					    dir="${build.deb.path}/.."
               error="${log.path}"
               passthru="true"
               checkreturn="true"/>
-	      <exec command="mv ${build.deb.path}.deb ./"
+	      <exec command="mv ${build.deb.path}.deb ./releases/"
               passthru="true"
+              error="${log.path}"
+              checkreturn="true"/>
+    </target>
+
+
+    <target name="vendor-pdfjs-deb" description="Create a deb from the application source">
+			  <property name="build.deb.path" value="./build/deb-pdfjs/${package.vendor.pdfjs.name}" />
+        <echo msg="Copy source package ${package.output.tar} to DEB build environement"/>
+	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/ ; cp releases/${package.vendor.pdfjs}  ${build.deb.path}/"
+              error="${log.path}"
+              checkreturn="true"/>
+        <echo msg="Creating the package ${package.vendor.pdfjs.deb}"/>
+	      <exec command="mkdir -p usr/share/tao-community/tao/views/js/lib/pdfjs ; tar xfz ${package.vendor.pdfjs} -C usr/share/tao-community/tao/views/js/lib/pdfjs"
+					    dir="${build.deb.path}"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="rm -f ${package.vendor.pdfjs}"
+					    dir="${build.deb.path}"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="cp -a ./source/vendor/pdfjs/deb/* ${build.deb.path}/"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="echo 'Version: ${vendor.pdfjs.version}' >>${build.deb.path}/DEBIAN/control"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="dpkg-deb -b ${package.vendor.pdfjs.name}"
+					    dir="${build.deb.path}/.."
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="mv ${build.deb.path}/../${package.vendor.pdfjs.deb} ./releases/"
+              passthru="true"
+              error="${log.path}"
+              checkreturn="true"/>
+    </target>
+
+    <target name="vendor-mathjax-deb" description="Create a deb from the application source">
+			  <property name="build.deb.path" value="./build/deb-mathjax/${package.vendor.mathjax.name}" />
+        <echo msg="Copy source package ${package.output.tar} to DEB build environement"/>
+	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/ ; cp releases/${package.vendor.mathjax}  ${build.deb.path}/"
+              error="${log.path}"
+              checkreturn="true"/>
+        <echo msg="Creating the package ${package.vendor.mathjax.deb}"/>
+	      <exec command="mkdir -p usr/share/tao-community/taoQtiItem/views/js/mathjax ; tar xfz ${package.vendor.mathjax} -C usr/share/tao-community/taoQtiItem/views/js/mathjax"
+					    dir="${build.deb.path}"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="rm -f ${package.vendor.mathjax}"
+					    dir="${build.deb.path}"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="cp -a ./source/vendor/mathjax/deb/* ${build.deb.path}/"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="echo 'Version: ${vendor.mathjax.version}' >>${build.deb.path}/DEBIAN/control"
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="dpkg-deb -b ${package.vendor.mathjax.name}"
+					    dir="${build.deb.path}/.."
+              error="${log.path}"
+              passthru="true"
+              checkreturn="true"/>
+	      <exec command="mv ${build.deb.path}/../${package.vendor.mathjax.deb} ./releases/"
+              passthru="true"
+              error="${log.path}"
+              checkreturn="true"/>
+    </target>
+
+    <target name="vendor-pdfjs-rpm" description="Create a rpm from the application source">
+			  <property name="build.rpm.path" value="./build/rpm-pdfjs/" />
+        <echo msg="Copy source package ${package.output.tar} to RPM build environement"/>
+	      <exec command="rm -rf ${build.rpm.path} ; mkdir -p ${build.rpm.path}/SOURCES/ ; cp releases/${package.vendor.pdfjs}  ${build.rpm.path}/SOURCES/"
+              error="${log.path}"
+              checkreturn="true"/>
+        <echo msg="Creating the package ${package.vendor.pdfjs.rpm}"/>
+	      <exec command="PJ_VERSION='${vendor.pdfjs.version}' rpmbuild -ba ./source/vendor/pdfjs/rpm/tao-community-pdfjs.spec --target noarch --define '_topdir ${phing.dir}/${build.rpm.path}' --define '_rpmfilename ${package.vendor.pdfjs.rpm}'"
+              error="${log.path}"
+              checkreturn="true"/>
+	      <exec command="mv ${build.rpm.path}/RPMS/${package.vendor.pdfjs.rpm} ./releases/"
+              error="${log.path}"
+              checkreturn="true"/>
+    </target>
+
+    <target name="vendor-mathjax-rpm" description="Create a rpm from the application source">
+			  <property name="build.rpm.path" value="./build/rpm-mathjax/" />
+        <echo msg="Copy source package ${package.output.tar} to RPM build environement"/>
+	      <exec command="rm -rf ${build.rpm.path} ; mkdir -p ${build.rpm.path}/SOURCES/ ; cp releases/${package.vendor.mathjax}  ${build.rpm.path}/SOURCES/"
+              error="${log.path}"
+              checkreturn="true"/>
+        <echo msg="Creating the package ${package.vendor.mathjax.rpm}"/>
+	      <exec command="MJ_VERSION='${vendor.mathjax.version}' rpmbuild -ba ./source/vendor/mathjax/rpm/tao-community-mathjax.spec --target noarch --define '_topdir ${phing.dir}/${build.rpm.path}' --define '_rpmfilename ${package.vendor.mathjax.rpm}'"
+              error="${log.path}"
+              checkreturn="true"/>
+	      <exec command="mv ${build.rpm.path}/RPMS/${package.vendor.mathjax.rpm} ./releases/"
               error="${log.path}"
               checkreturn="true"/>
     </target>
@@ -113,14 +261,19 @@
     <target name="pack-rpm" description="Create a rpm from the application source">
 			  <property name="build.rpm.path" value="./build/rpm/" />
         <echo msg="Copy source package ${package.output.tar} to RPM build environement"/>
-	      <exec command="rm -rf ${build.rpm.path} ; mkdir -p ${build.rpm.path}/SOURCES/ ; cp ${package.output.tar} ${build.rpm.path}/SOURCES/"
+	      <exec command="rm -rf ${build.rpm.path} ; mkdir -p ${build.rpm.path}/SOURCES/ ; cp releases/${package.output.tar} ${build.rpm.path}/SOURCES/"
               error="${log.path}"
+              checkreturn="true"/>
+        <echo msg="Copy additional files for RPM build"/>
+	      <exec command="tar -c -z -f ../../${build.rpm.path}/SOURCES/tao-community-rpm-resources.tar.gz resources"
+              error="${log.path}"
+							dir="source/rpm"
               checkreturn="true"/>
         <echo msg="Creating the package ${package.output.rpm}"/>
 	      <exec command="TAO_VERSION='${release.version}' rpmbuild -ba ./source/rpm/tao-community.spec --target noarch --define '_topdir ${phing.dir}/${build.rpm.path}' --define '_rpmfilename ${package.output.rpm}'"
               error="${log.path}"
               checkreturn="true"/>
-	      <exec command="mv ${build.rpm.path}/RPMS/${package.output.rpm} ./"
+	      <exec command="mv ${build.rpm.path}/RPMS/${package.output.rpm} ./releases/"
               error="${log.path}"
               checkreturn="true"/>
     </target>
@@ -135,21 +288,21 @@
 
 		<target name="push-tar" depends="identify-release">
 			<echo msg="Pushing ${package.output.tar} to ${github.tag} (${github.release.id})" />
-			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.tar}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.tar}'"
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.output.tar}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.tar}'"
               error="${log.path}"
               checkreturn="true"/>
 		</target>
 
 		<target name="push-rpm" depends="identify-release">
 			<echo msg="Pushing ${package.output.rpm} to ${github.tag} (${github.release.id})" />
-			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.rpm}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.rpm}'"
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.output.rpm}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.rpm}'"
               error="${log.path}"
               checkreturn="true"/>
 		</target>
 
 		<target name="push-deb" depends="identify-release">
 			<echo msg="Pushing ${package.output.deb} to ${github.tag} (${github.release.id})" />
-			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'${package.output.deb}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.deb}'"
+			<exec command="curl -H 'Authorization: token ${github.token}' -H 'Content-Type: application/octet-stream' --data-binary @'releases/${package.output.deb}' 'https://uploads.github.com/repos/${github.owner}/${github.repo}/releases/${github.release.id}/assets?name=${package.output.deb}'"
               error="${log.path}"
               checkreturn="true"/>
 

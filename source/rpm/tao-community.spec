@@ -7,6 +7,7 @@ Summary:        Open-Source Testing and Assessment authoring and delivery softwa
 License:        GNU GPL v2
 URL:            https://hub.taocloud.org/
 Source0:        %{name}-%{version}.tar.gz
+Source1:        %{name}-rpm-resources.tar.gz
 
 BuildArch:      noarch
 #BuildRequires:
@@ -23,18 +24,26 @@ TAO is the first commercial-grade Open Source assessment development software on
 %prep
 
 %setup -c
+%setup -D -T -a 1
 
 %build
 
 %install
-mkdir -p %{buildroot}%{_datadir}/%{name}
-mv .htaccess * %{buildroot}%{_datadir}/%{name}/
-#rm -rf %{buildroot}/%{_datadir}/%{name}/taoqtiitem/views/js/portablesharedlibraries %{buildroot}/%{_datadir}/%{name}/tao/views/locales
-mkdir -p                                                     \
+mkdir -p                                                         \
+ %{buildroot}/%{_sysconfdir}/httpd/conf.d/                       \
+ %{buildroot}/%{_sysconfdir}/php-fpm.d/                          \
  %{buildroot}/%{_sysconfdir}/%{name}                             \
- %{buildroot}/%{_sharedstatedir}/%{name}/portablesharedlibraries \
+ %{buildroot}/%{_datadir}/%{name}                                \
+ %{buildroot}/%{_localstatedir}/log/%{name}                      \
+ %{buildroot}/%{_sharedstatedir}/%{name}/portableSharedLibraries \
  %{buildroot}/%{_sharedstatedir}/%{name}/files                   \
  %{buildroot}/%{_sharedstatedir}/%{name}/locales
+
+mv resources/tao-community.conf %{buildroot}/%{_sysconfdir}/httpd/conf.d/
+mv resources/taosrv.conf %{buildroot}/%{_sysconfdir}/php-fpm.d/
+
+rm -rf resources
+mv .htaccess * %{buildroot}%{_datadir}/%{name}/
 
 %clean
 rm -rf %{buildroot}
@@ -42,18 +51,25 @@ rm -rf %{buildroot}
 %files
 %license %{_datadir}/%{name}/LICENSE
 %{_datadir}/%{name}/
+%{_localstatedir}/log/%{name}/
 %{_sharedstatedir}/%{name}/files/
+%{_sharedstatedir}/%{name}/locales/
+%{_sharedstatedir}/%{name}/portableSharedLibraries/
 %config(noreplace) %{_sysconfdir}/%{name}/
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/tao-community.conf
+%config(noreplace) %{_sysconfdir}/php-fpm.d/taosrv.conf
 
 %pre
 /usr/bin/getent group taosrv > /dev/null  || /usr/sbin/groupadd -r taosrv
 /usr/bin/getent passwd taosrv > /dev/null || /usr/sbin/useradd -r -d %{_datadir}/%{name} -s /sbin/nologin -g taosrv taosrv
 
 %post
-ln -fs %{_sharedstatedir}/%{name}/files %{_datadir}/%{name}/data
 ln -fs %{_sysconfdir}/%{name} %{_datadir}/%{name}/config
+ln -fs %{_sharedstatedir}/%{name}/files %{_datadir}/%{name}/data
 ln -fs %{_sharedstatedir}/%{name}/portableSharedLibraries %{_datadir}/%{name}/taoQtiItem/views/js/portableSharedLibraries
 ln -fs %{_sharedstatedir}/%{name}/locales %{_datadir}/%{name}/tao/views/locales
+
+chown -R taosrv %{_datadir}/%{name} %{_sysconfdir}/%{name} %{_sharedstatedir}/%{name}
 
 %postun
 case "$1" in

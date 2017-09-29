@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+
+case $1 in
+  configure)
+    mkdir -p /etc/tao-community /var/lib/tao-community/files /var/lib/tao-community/locales /var/lib/tao-community/portableSharedLibraries /var/log/tao-community
+    ln -s /etc/tao-community                             /usr/share/tao-community/config
+    ln -s /var/lib/tao-community/files                   /usr/share/tao-community/data
+    ln -s /var/lib/tao-community/locales                 /usr/share/tao-community/tao/views/locales
+    ln -s /var/lib/tao-community/portableSharedLibraries /usr/share/tao-community/taoQtiItem/views/js/portableSharedLibraries
+
+    /usr/bin/getent group taosrv > /dev/null  || /usr/sbin/groupadd -r taosrv
+    /usr/bin/getent passwd taosrv > /dev/null || /usr/sbin/useradd -r -d /usr/share/tao-community -s /sbin/nologin -g taosrv taosrv
+
+    chown -R taosrv: /usr/share/tao-community /etc/tao-community /var/lib/tao-community /var/log/tao-community
+
+    a2enmod proxy_fcgi
+    a2enmod rewrite
+    a2enmod deflate
+    a2ensite tao-community
+  ;;
+esac
+
+exit 0

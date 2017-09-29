@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  tao-community:
+    build: .
+    ports:
+     - "8740:80"
+     - "22740:22"
+    links:
+     - tao-db:tao-db
+    depends_on:
+     - tao-db
+  tao-db:
+    image: mysql:5
+    environment:
+      MYSQL_ROOT_PASSWORD: tao

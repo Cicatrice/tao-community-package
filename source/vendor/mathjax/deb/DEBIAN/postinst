@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+
+case $1 in
+  configure)
+    chown -R taosrv: /usr/share/tao-community 
+  ;;
+esac
+
+exit 0
