@@ -54,7 +54,7 @@
 		</target>
 
 		<target name="vendor-pdfjs-tar" depends="prepare-env" description="Create a tar from the application source">
-			  <property name="build.vendor.pdfjs.path" value="./build/vendor/pdfjs" />
+			  <property name="build.vendor.pdfjs.path" value="./build/vendor/pdfjs" override="true" />
         <echo msg="Creating the package ${package.vendor.pdfjs}"/>
 	      <exec command="rm -rf ${build.vendor.pdfjs.path} ; mkdir -p ${build.vendor.pdfjs.path} ; wget --quiet -O ${build.vendor.pdfjs.path}/pdfjs.zip ${vendor.pdfjs.release}"
               error="${log.path}"
@@ -71,7 +71,7 @@
 		</target>
 
 		<target name="vendor-mathjax-tar" depends="prepare-env" description="Create a tar from the application source">
-			  <property name="build.vendor.mathjax.path" value="./build/vendor/mathjax" />
+			  <property name="build.vendor.mathjax.path" value="./build/vendor/mathjax" override="true" />
         <echo msg="Creating the package ${package.vendor.mathjax}"/>
 	      <exec command="rm -rf ${build.vendor.mathjax.path} ; mkdir -p ${build.vendor.mathjax.path} ; wget --quiet -O ${build.vendor.mathjax.path}/../mathjax.tar.gz ${vendor.mathjax.release}"
               error="${log.path}"
@@ -100,7 +100,7 @@
 
     <target name="pack-ppa" description="create a ppa from the application source">
 			  <fail msg="not yet implemented" />
-			  <property name="build.ppa.path" value="./build/ppa/${build.ppa.name}" />
+			  <property name="build.ppa.path" value="./build/ppa/${build.ppa.name}" override="true"/>
         <echo msg="copy source package ${package.output.tar} to ppa build environement"/>
 	      <exec command="rm -rf ${build.ppa.path} ; mkdir -p ${build.ppa.path} ; cp releases/${package.output.tar} ${build.ppa.path}/"
               error="${log.path}"
@@ -134,7 +134,7 @@
     </target>
 
     <target name="pack-deb" depends="pack-tar" description="create a deb from the application source">
-			  <property name="build.deb.path" value="./build/deb/${build.deb.name}" />
+			  <property name="build.deb.path" value="./build/deb/${build.deb.name}" override="true"/>
         <echo msg="copy source package ${package.output.tar} to deb build environement"/>
 	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/DEBIAN ; cp releases/${package.output.tar} ${build.deb.path}/"
               error="${log.path}"
@@ -170,7 +170,7 @@
 
 
     <target name="vendor-pdfjs-deb" depends="vendor-pdfjs-tar" description="Create a deb from the application source">
-			  <property name="build.deb.path" value="./build/deb-pdfjs/${package.vendor.pdfjs.name}" />
+			  <property name="build.deb.path" value="./build/deb-pdfjs/${package.vendor.pdfjs.name}" override="true"/>
         <echo msg="Copy source package ${package.output.tar} to DEB build environement"/>
 	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/ ; cp releases/${package.vendor.pdfjs}  ${build.deb.path}/"
               error="${log.path}"
@@ -206,7 +206,7 @@
     </target>
 
     <target name="vendor-mathjax-deb" depends="vendor-mathjax-tar" description="Create a deb from the application source">
-			  <property name="build.deb.path" value="./build/deb-mathjax/${package.vendor.mathjax.name}" />
+			  <property name="build.deb.path" value="./build/deb-mathjax/${package.vendor.mathjax.name}"  override="true"/>
         <echo msg="Copy source package ${package.vendor.mathjax} to DEB build environement"/>
 	      <exec command="rm -rf ${build.deb.path} ; mkdir -p ${build.deb.path}/ ; cp releases/${package.vendor.mathjax}  ${build.deb.path}/"
               error="${log.path}"
@@ -242,7 +242,7 @@
     </target>
 
     <target name="vendor-pdfjs-rpm" depends="vendor-pdfjs-tar" description="Create a rpm from the application source">
-			  <property name="build.rpm.path" value="./build/rpm-pdfjs/" />
+			  <property name="build.rpm.path" value="./build/rpm-pdfjs/" override="true" />
         <echo msg="Copy source package ${package.output.tar} to RPM build environement"/>
 	      <exec command="rm -rf ${build.rpm.path} ; mkdir -p ${build.rpm.path}/SOURCES/ ; cp releases/${package.vendor.pdfjs}  ${build.rpm.path}/SOURCES/"
               error="${log.path}"
@@ -257,7 +257,7 @@
     </target>
 
     <target name="vendor-mathjax-rpm" depends="vendor-mathjax-tar" description="Create a rpm from the application source">
-			  <property name="build.rpm.path" value="./build/rpm-mathjax/" />
+			  <property name="build.rpm.path" value="./build/rpm-mathjax/" override="true" />
         <echo msg="Copy source package ${package.output.tar} to RPM build environement"/>
 	      <exec command="rm -rf ${build.rpm.path} ; mkdir -p ${build.rpm.path}/SOURCES/ ; cp releases/${package.vendor.mathjax}  ${build.rpm.path}/SOURCES/"
               error="${log.path}"
@@ -272,7 +272,7 @@
     </target>
 
     <target name="pack-rpm" depends="pack-tar" description="Create a rpm from the application source">
-			  <property name="build.rpm.path" value="./build/rpm/" />
+			  <property name="build.rpm.path" value="./build/rpm/" override="true" />
         <echo msg="Copy source package ${package.output.tar} to RPM build environement"/>
 	      <exec command="rm -rf ${build.rpm.path} ; mkdir -p ${build.rpm.path}/SOURCES/ ; cp releases/${package.output.tar} ${build.rpm.path}/SOURCES/"
               error="${log.path}"
