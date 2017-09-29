@@ -341,5 +341,5 @@
               error="${log.path}"
               checkreturn="true"/>
 		</target>
-		<target name="push-all" depends="pack-tar,pack-rpm,pack-deb,vendor-mathjax-rpm,vendor-mathjax-deb,vendor-pdfjs-rpm,vendor-pdfjs-deb,push-tar,push-rpm,push-deb,push-vendor-rpm,push-vendor-deb" />
+		<target name="push-all" depends="push-tar,push-rpm,push-deb,push-vendor-rpm,push-vendor-deb" />
 </project>
