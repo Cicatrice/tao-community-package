@@ -1,5 +1,7 @@
-FROM ubuntu:xenial
+FROM ubuntu:bionic
 RUN apt update
+ENV TZ=Europe/Luxembourg
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt install -y phing git libswitch-perl libdatetime-perl imagemagick php-fpm php-apcu php-mysql php-pgsql php-redis php-curl php-redis php-gd php-imagick php-mbstring php-zip php-fdomdocument phing mysql-client postgresql-client redis-tools apache2
 RUN apt install -y supervisor openssh-server
 ADD tao-community*deb  /releases/

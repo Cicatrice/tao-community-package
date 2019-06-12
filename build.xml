@@ -55,13 +55,17 @@
 		</target>
 
 		<target name="build" depends="prepare-env">
-				<exec command="cp -a source/app build/"
+			  <exec command="cp -a source/app build/"
 							error="${log.path}"
 							checkreturn="true"/>
-			  <exec command="composer install -o --no-interaction --ansi --no-progress --no-dev"
-              error="${log.path}"
+			  <exec command="composer install -o --no-interaction --ansi --no-progress --no-dev --no-scripts"
+              						error="${log.path}"
 							dir="build/app"
-              checkreturn="true"/>
+              						checkreturn="true"/>
+			  <exec command="npm install"
+              						error="${log.path}"
+				  			dir="build/app/tao/views"
+              						checkreturn="true"/>
 		</target>
 
 		<target name="vendor-pdfjs-tar" depends="prepare-env" description="Create a tar from the application source">

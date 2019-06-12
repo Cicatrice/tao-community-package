@@ -50,45 +50,17 @@
     "computer-based-assessment"
   ],
   "repositories": [
+	          {
+            "type": "vcs",
+            "url":  "git@github.com:oat-sa/tao-community.git"
+}
 
   ],
   "minimum-stability": "dev",
   "homepage": "http://www.taotesting.com",
   "require": {
     "oat-sa/phing-task-tao": "~0.1",
-    "oat-sa/generis": "~4.4.2",
-    "oat-sa/tao-core": "~13.0.1",
-    "oat-sa/extension-tao-community": "~3.6.0",
-    "oat-sa/extension-tao-funcacl": "~4.0.0",
-    "oat-sa/extension-tao-dac-simple": "~2.0.3",
-    "oat-sa/extension-tao-testtaker": "~3.0.2",
-    "oat-sa/extension-tao-group": "~3.0.1",
-    "oat-sa/extension-tao-item": "~5.1.0",
-    "oat-sa/extension-tao-itemhtml": "~3.0.0",
-    "oat-sa/extension-tao-itemqti": "~10.3.0",
-    "oat-sa/extension-tao-itemqti-pci": "~3.4.0",
-    "oat-sa/extension-tao-itemqti-pic": "~4.1.0",
-    "oat-sa/extension-tao-test": "~6.5.0",
-    "oat-sa/extension-tao-testlinear": "~3.0.0",
-    "oat-sa/extension-tao-testqti": "~16.0.0",
-    "oat-sa/extension-tao-outcome": "~3.4.0",
-    "oat-sa/extension-tao-outcomeui": "~4.7.2",
-    "oat-sa/extension-tao-outcomerds": "~2.2.1",
-    "oat-sa/extension-tao-outcomekeyvalue": "~2.2.0",
-    "oat-sa/extension-tao-outcomelti": "~3.0.1",
-    "oat-sa/extension-tao-delivery": "~7.3.5",
-    "oat-sa/extension-tao-lti": "~3.3.1",
-    "oat-sa/extension-tao-ltideliveryprovider": "~3.5.1",
-    "oat-sa/extension-tao-devtools": "~3.1.1",
-    "oat-sa/extension-tao-ontobrowser": "~3.0.0",
-    "oat-sa/extension-tao-revision": "~3.0.0",
-    "oat-sa/extension-tao-mediamanager": "~2.1.0",
-    "oat-sa/extension-pcisample": "~2.1.0",
-    "oat-sa/extension-tao-backoffice": "~1.1.0",
-    "oat-sa/extension-tao-proctoring": "~7.5.1",
-    "oat-sa/extension-tao-clientdiag": "~2.6.0",
-    "oat-sa/extension-tao-eventlog": "~1.1.2",
-    "doctrine/inflector": "~1.0.0"
+    "oat-sa/tao-community": "~0.104"
   },
   "description": "TAO is an Open Source e-Testing platform that empowers you to build, deliver, and share innovative and engaging assessments online – in any language or subject matter."
 }

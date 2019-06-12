@@ -4,7 +4,7 @@ RUN dnf install -y phing git php-fpm php-apcu php-mysqlnd php-pgsql php-redis ph
 RUN dnf install -y ImageMagick supervisor openssh-server
 ADD tao-community*rpm  /releases/
 RUN dnf install -y /releases/tao-community*rpm
-RUN mkdir -p /var/log/supervisor
+RUN mkdir -p /var/log/supervisor /run/php-fpm
 
 COPY supervisord.conf /etc/supervisord.d/supervisord.conf
 
